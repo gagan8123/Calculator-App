@@ -133,26 +133,21 @@ class calculator_variable extends ChangeNotifier {
       case "x":
       case "/":
       case "%":
-        if(a!="" && operator == ""){
-          if (pos == 0) {
-            operator = input1;
-            if (operator == "%") {
-              calc();
-            } else {
-
-              output += operator;
-            }
-          } else {
-            operator = input1 ;
-            calc();
-            if (operator != "%") {
-              output += operator;
-            }
+        calc(input1);
+        break;
+      case ".":
+        if (pos == 0) {
+          if (!a.contains(".")) {
+            a += input1;
+            output += input1;
           }
-          pos++;
+        } else {
+          if (!b.contains(".")) {
+            b += input1;
+            output += input1;
+          }
         }
         break;
-
       case "1":
       case "2":
       case "3":
@@ -164,7 +159,6 @@ class calculator_variable extends ChangeNotifier {
       case "9":
       case "0":
       case "00":
-      case ".":
         if (pos == 0) {
           a += input1.toString();
         } else {
@@ -191,12 +185,10 @@ class calculator_variable extends ChangeNotifier {
           b = "";
         }
         break;
-
       case "=":
-        calc();
+        calc(input1);
         break;
     }
-
     sc.jumpTo(sc.position.maxScrollExtent + 3);
     notifyListeners();
   }
@@ -213,60 +205,88 @@ class calculator_variable extends ChangeNotifier {
         break;
       default:
         if (pos == 0) {
-          a = a.substring(0, a.length - 1 >= 0 ? a.length - 1 : 0);
+          a = a.substring(0, a.length - 1);
         } else {
-          b = b.substring(0, b.length - 1 >= 0 ? b.length - 1 : 0);
+          b = b.substring(0, b.length - 1);
         }
     }
   }
 
-  void calc() {
-    if (a != "") {
+  void calc(String op) {
+    //first operator input
+    if (pos == 0 && (op != "%" && op != "=") && a != "") {
+      operator = op;
+      output += op;
+      pos++;
+      return;
+    }
+    // % calculation
+    if (operator != "" && op == "%") {
       double val1 = double.parse(a);
+      double val2 = double.parse(b);
       double ans = 0.0;
-      if (b != "") {
-        double val2 = double.parse(b);
-        switch (operator) {
-          case "+":
-            ans = val1 + val2;
-          case "-":
-            ans = val1 - val2;
-          case "x":
-            ans = val1 * val2;
-          case "/":
-            ans = val1 / val2;
-          // case"%":
-          //     ans = val1%val2;
-        }
-        if (ans % 1 == 0) {
-          a = ans.toInt().toString();
-          pos--;
-          b = "";
-          output = a;
-        } else {
-          a = ans.toString();
-          pos--;
-          b = "";
-          output = a;
-        }
-        operator = "";
-      }
-      if (operator == "%") {
-        ans = val1 / 100;
-        if (ans % 1 == 0) {
-          a = ans.toInt().toString();
-          pos--;
-          b = "";
-          output = a;
-        } else {
-          a = ans.toString();
-          pos--;
-          b = "";
-          output = a;
-        }
-        operator = "";
+      switch (operator) {
+        case "+":
+          ans = val1 + (val1 * val2 / 100);
+          break;
+        case "-":
+          ans = val1 - (val1 * val2 / 100);
+          break;
+        case "x":
+          ans = (val1 * val2) / 100;
+          break;
+        case "/":
+          ans = (val1 / val2) * 100;
+          break;
       }
 
+      if (ans % 1 == 0) {
+        output = ans.toInt().toString();
+      } else {
+        output = ans.toString();
+      }
+      a = output;
+      b = "";
+      pos = 0;
+      operator = "";
+      return;
+    }
+
+    if (a != "" && b != "" && pos == 1 && op != "%") {
+      num val1 = double.parse(a);
+      num val2 = double.parse(b);
+      num ans = 0.0;
+      switch (operator) {
+        case "+":
+          ans = val1 + val2;
+          break;
+        case "-":
+          ans = val1 - val2;
+          break;
+        case "x":
+          num x = pow(10, 15);
+          ans = ((val1 * x) * (val2 * x) / x) / x;
+          break;
+        case "/":
+          num x = pow(10, 15);
+          ans = (((val1 * x) / val2 * x) / x) / x;
+          break;
+      }
+      if (ans % 1 == 0) {
+        output = ans.toInt().toString();
+      } else {
+        output = ans.toString();
+      }
+      a = output;
+      b = "";
+      pos = 0;
+      operator = "";
+
+      if (op != "=") {
+        output += op;
+        operator = op;
+        pos++;
+      }
     }
   }
 }
