@@ -264,13 +264,23 @@ class calculator_variable extends ChangeNotifier {
           ans = val1 - val2;
           break;
         case "x":
-          num x = pow(10, 15);
-          ans = ((val1 * x) * (val2 * x) / x) / x;
-          break;
+          if(val1%1 !=0 || val2%1!=0){
+            num x = pow(10, 15);
+            ans = ((val1 * x) * (val2 * x) / x) / x;
+            break;
+          }else{
+            ans = val1*val2;
+            break;
+          }
         case "/":
-          num x = pow(10, 15);
-          ans = (((val1 * x) / val2 * x) / x) / x;
-          break;
+          if(val1%1!=0 || val2%1 !=0){
+            num x = pow(10, 15);
+            ans = (((val1 * x) / val2 * x) / x) / x;
+            break;
+          }else{
+            ans = val1/val2;
+            break;
+          }
       }
       if (ans % 1 == 0) {
         output = ans.toInt().toString();
